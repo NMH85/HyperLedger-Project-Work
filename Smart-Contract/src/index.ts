@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: Unlicensed
  */
 
-import {AnimalContract} from './animalContract';
+import {AnimalContract} from './animal-ChainCode';
 
-export {AnimalContract} from './animalContract';
+export {AnimalContract} from './animal-ChainCode';
 
 export const contracts: any[] = [AnimalContract];
