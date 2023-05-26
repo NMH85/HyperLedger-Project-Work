@@ -32,7 +32,7 @@ export class Animal{
     public imgUrl: string;
 
     @Property()
-    public pedigree: boolean;
+    public pedigree: string;
 
 
 }

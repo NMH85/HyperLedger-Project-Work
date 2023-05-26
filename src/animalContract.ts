@@ -1,6 +1,6 @@
 import {Context, Contract, Info, Returns, Transaction} from 'fabric-contract-api';
 import stringify from 'json-stringify-deterministic';
-import { Animal } from './animal';
+import { Animal, Owner } from './animal';
 
 export class AnimalContract extends Contract {
     
@@ -13,13 +13,14 @@ export class AnimalContract extends Contract {
 
 @Transaction()
 
-public async createanimal (ctx: Context, id: string, name: string, type: string, breed: string, birthDate: string, description: string, imgUrl: string, pedigree:boolean): Promise<void> {
+public async createanimal (ctx: Context, id: string, name: string, type: string, breed: string, birthDate: string, description: string, imgUrl: string, pedigree:string,
+    ownerId: string, ownerLastname: string, ownerName: string ): Promise<void> {
     const exists = await this.animalexists(ctx, id);
     if (exists) {
         throw new Error(`The animal ${id} already exists`);
     }
     
-    const animal : Animal = {
+    const animal = {
         
         ID: id,
         name: name,
@@ -28,7 +29,10 @@ public async createanimal (ctx: Context, id: string, name: string, type: string,
         birthDate: birthDate,
         description: description,
         imgUrl: imgUrl,
-        pedigree: pedigree
+        pedigree: pedigree,
+        ownerId: ownerId,
+        ownerName: ownerName,
+        ownerLastname: ownerLastname
     }
         
     await ctx.stub.putState (id, Buffer.from(stringify(animal)));
@@ -83,7 +87,8 @@ public async animalexists (ctx: Context, id: string): Promise<boolean> {
 
 @Transaction()
 
-public async updateanimal (ctx: Context, id: string, name: string, type: string, breed: string, birthDate: string, description: string, imgUrl: string, pedigree:boolean): Promise<void> {
+public async updateanimal (ctx: Context, id: string, name: string, type: string, breed: string, birthDate: string, description: string, imgUrl: string, pedigree:string,
+   ownerId: string, ownerLastname: string, ownerName: string ): Promise<void> {
     
     const exists = await this.animalexists(ctx, id);
     
@@ -92,7 +97,7 @@ public async updateanimal (ctx: Context, id: string, name: string, type: string,
     }
 
     
-    const updatedAnimal:Animal = {
+    const updatedAnimal = {
        
         ID: id,
         name: name,
@@ -101,7 +106,10 @@ public async updateanimal (ctx: Context, id: string, name: string, type: string,
         birthDate: birthDate,
         description: description,
         imgUrl: imgUrl,
-        pedigree: pedigree
+        pedigree: pedigree,
+        ownerId: ownerId,
+        ownerName: ownerName,
+        ownerLastname: ownerLastname,
     };
     
     return ctx.stub.putState (id, Buffer.from(stringify(updatedAnimal)));
