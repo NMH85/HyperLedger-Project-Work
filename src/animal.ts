@@ -36,3 +36,20 @@ export class Animal{
 
 
 }
+
+@Object()
+export class Owner extends Animal  {
+
+  @Property()
+  public docType?: string;
+
+  @Property()
+  public ownerId: string;
+
+  @Property()
+  public ownerName: string;
+
+  @Property()
+  public ownerLastname: string;
+
+}

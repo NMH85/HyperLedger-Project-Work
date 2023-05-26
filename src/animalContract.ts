@@ -3,20 +3,24 @@ import stringify from 'json-stringify-deterministic';
 import { Animal } from './animal';
 
 export class AnimalContract extends Contract {
+    
     @Transaction()
-    public async InitLedger(ctx: Context): Promise<void>{
+    
+    public async InitLedger (ctx: Context): Promise<void>{
 
     }
 
 
 @Transaction()
-public async CreateAnimal(ctx: Context, id: string, name: string, type: string, breed: string, birthDate: string, description: string, imgUrl: string, pedigree:boolean): Promise<void> {
-    const exists = await this.AnimalExists(ctx, id);
+
+public async createanimal (ctx: Context, id: string, name: string, type: string, breed: string, birthDate: string, description: string, imgUrl: string, pedigree:boolean): Promise<void> {
+    const exists = await this.animalexists(ctx, id);
     if (exists) {
         throw new Error(`The animal ${id} already exists`);
     }
     
     const animal : Animal = {
+        
         ID: id,
         name: name,
         type: type,
@@ -27,31 +31,37 @@ public async CreateAnimal(ctx: Context, id: string, name: string, type: string, 
         pedigree: pedigree
     }
         
-    await ctx.stub.putState(id, Buffer.from(stringify(animal)));
+    await ctx.stub.putState (id, Buffer.from(stringify(animal)));
 }
     
 
 
 @Transaction()
-public async UpdateAnimalName(ctx: Context, id: string, newname: string, ): Promise<void> {
-    const exists = await this.AnimalExists(ctx, id);
+
+public async updateanimalname (ctx: Context, id: string, newname: string, ): Promise<void> {
+    
+    const exists = await this.animalexists(ctx, id);
+   
     if (!exists) {
         throw new Error(`The animal with id:${id} does not exist`);
     }
 
-    const animalString = await this.ReadAnimal(ctx, id);
+    const animalString = await this.readanimal(ctx, id);
     const animal = JSON.parse(animalString) as Animal;
     animal.name=newname
 
     
-    // we insert data in the world state
+    
     return ctx.stub.putState(id, Buffer.from(stringify(animal)));
 }
 
 
 @Transaction(false)
-public async ReadAnimal(ctx: Context, id: string): Promise<string> {
-    const assetJSON = await ctx.stub.getState(id); // get the animal from chaincode state
+
+public async readanimal (ctx: Context, id: string): Promise<string> {
+    
+    const assetJSON = await ctx.stub.getState(id); 
+   
     if (!assetJSON || assetJSON.length === 0) {
         throw new Error(`The animal with id:${id} does not exist`);
     }
@@ -59,24 +69,32 @@ public async ReadAnimal(ctx: Context, id: string): Promise<string> {
 }
 
 @Transaction(false)
+
 @Returns('boolean')
-public async AnimalExists(ctx: Context, id: string): Promise<boolean> {
+
+public async animalexists (ctx: Context, id: string): Promise<boolean> {
+    
     const assetJSON = await ctx.stub.getState(id);
+    
     return assetJSON && assetJSON.length > 0;
 }
 
 
 
 @Transaction()
-public async UpdateAnimal(ctx: Context, id: string, name: string, type: string, breed: string, birthDate: string, description: string, imgUrl: string, pedigree:boolean): Promise<void> {
-    const exists = await this.AnimalExists(ctx, id);
+
+public async updateanimal (ctx: Context, id: string, name: string, type: string, breed: string, birthDate: string, description: string, imgUrl: string, pedigree:boolean): Promise<void> {
+    
+    const exists = await this.animalexists(ctx, id);
+    
     if (!exists) {
         throw new Error(`The animal with id:${id} does not exist`);
     }
 
     
     const updatedAnimal:Animal = {
-       ID: id,
+       
+        ID: id,
         name: name,
         type: type,
         breed: breed,
@@ -86,13 +104,16 @@ public async UpdateAnimal(ctx: Context, id: string, name: string, type: string, 
         pedigree: pedigree
     };
     
-    return ctx.stub.putState(id, Buffer.from(stringify(updatedAnimal)));
+    return ctx.stub.putState (id, Buffer.from(stringify(updatedAnimal)));
 }
 
 
 @Transaction()
-public async DeleteAnimal(ctx: Context, id: string): Promise<void> {
-    const exists = await this.AnimalExists(ctx, id);
+
+public async deleteanimal (ctx: Context, id: string): Promise<void> {
+    
+    const exists = await this.animalexists(ctx, id);
+    
     if (!exists) {
         throw new Error(`The animal with id:${id} does not exist`);
     }
@@ -102,24 +123,188 @@ public async DeleteAnimal(ctx: Context, id: string): Promise<void> {
 
 
 @Transaction(false)
+
 @Returns('string')
-public async GetAllAnimals(ctx: Context): Promise<string> {
+
+public async getallanimals (ctx: Context): Promise<string> {
+
     const allAnimals: Animal[] = [];
-    // range query with empty string for startKey and endKey does an open-ended query of all assets in the chaincode namespace.
+
     const iterator = await ctx.stub.getStateByRange('', '');
+    
     let result = await iterator.next();
+    
     while (!result.done) {
-        const strValue = Buffer.from(result.value.value.toString()).toString('utf8');
+   
+        const strValue = Buffer.from (result.value.value.toString()).toString('utf8');
         let record;
+       
         try {
             record = JSON.parse(strValue);
         } catch (err) {
             console.log(err);
             record = strValue;
         }
+       
         allAnimals.push(record);
         result = await iterator.next();
     }
     return JSON.stringify(allAnimals);
 }
+
+@Transaction(false)
+    
+    public async getanimalhistory (ctx: Context, id: string) {
+        
+        let resultsIterator = await ctx.stub.getHistoryForKey(id);
+        let results = await this._getallresults(resultsIterator, true);
+
+        return JSON.stringify(results);
+
+    }
+
+    public async _getallresults (iterator, isHistory) {
+        
+        let allResults = [];
+        let res = await iterator.next();
+        
+        while (!res.done) {
+            
+            if (res.value && res.value.value.toString()) {
+                
+                let jsonRes: any = {};
+                console.log(res.value.value.toString("utf-8"));
+                
+                if (isHistory && isHistory === true) {
+                    
+                    jsonRes.TxId = res.value.txId;
+                    jsonRes.Timestamp = res.value.timestamp;
+                    
+                    try {
+                        jsonRes.value = JSON.parse(res.value.value.toString("utf-8"));
+                    } 
+                    
+                    catch (e) {
+                        console.log(e);
+                        jsonRes.value = res.value.value.toString("utf-8");
+                    }
+                }
+                
+                else {
+                    jsonRes.Key = res.value.key;
+                    
+                    try {
+                        jsonRes.Record = JSON.parse(res.value.value.toString("utf-8"))
+                    }
+                   
+                    catch (e) {
+                        console.log(e);
+                        jsonRes.Record = res.value.value.toString("utf-8");
+                    }
+                }
+                allResults.push(jsonRes);
+            }
+            res = await iterator.next();
+        }
+        iterator.close();
+        
+        return allResults;
+    }
+
+
+    @Transaction(false)
+    
+    public async getanimalbyname (ctx: Context, name: string): Promise<string> {
+    
+        const allResults = [];
+        const iterator = await ctx.stub.getQueryResult(name);
+        let result = await iterator.next();
+    
+        while (!result.done) {
+    
+            const strValue = Buffer.from(result.value.value.toString()).toString(
+                "utf8"
+            );
+            let record;
+    
+            try {
+                record = JSON.parse(strValue);
+            } 
+            
+            catch (err) {
+                console.log(err);
+                record = strValue;
+            }
+            
+            allResults.push(record);
+            result = await iterator.next();
+        }
+        return JSON.stringify(allResults);
+    }
+
+     @Transaction(false)
+    
+     public async getanimalbyowner(
+    
+        ctx: Context,
+        ownerId: string
+    ): 
+    Promise<string> {
+        const allResults = [];
+
+        const iterator = await ctx.stub.getQueryResult(ownerId);
+        let result = await iterator.next();
+    
+        while (!result.done) {
+    
+            const strValue = Buffer.from (result.value.value.toString()).toString(
+                "utf8"
+            );
+    
+            let record;
+    
+            try {
+                record = JSON.parse(strValue);
+            } 
+            
+            catch (err) {
+                console.log(err);
+                record = strValue;
+            }
+            
+            allResults.push(record);
+            result = await iterator.next();
+        }
+        return JSON.stringify(allResults);
+    }
+
+    @Transaction()
+    
+    public async changeowner(
+    
+        ctx: Context,
+        id: string,
+        newId: string,
+        newOwnerName: string,
+        newOwnerLastname: string
+    
+    ): Promise<void> {
+    
+        const exists = await this.animalexists(ctx, id);
+    
+        if (!exists) {
+            throw new Error(`The animal ${id} does not exist`);
+        }
+
+        const updatedOwner = {
+            ownerId: newId,
+            ownerName: newOwnerName,
+            ownerLastname: newOwnerLastname,
+        };
+
+        return ctx.stub.putState (id, Buffer.from(stringify(updatedOwner)));
+    }
+
+
+
 }
