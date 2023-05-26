@@ -15,7 +15,7 @@ export class AnimalContract extends Contract {
 
 public async createanimal (ctx: Context, id: string, name: string, type: string, breed: string, 
     birthDate: string, description: string, imgUrl: string, pedigree:string,
-    ownerId: string, ownerLastname: string, ownerName: string ): 
+    OwnerId: string, OwnerLastname: string, OwnerName: string ): 
     Promise<void> {
     
     const exists = await this.animalexists(ctx, id);
@@ -34,9 +34,9 @@ public async createanimal (ctx: Context, id: string, name: string, type: string,
         description: description,
         imgUrl: imgUrl,
         pedigree: pedigree,
-        ownerId: ownerId,
-        ownerName: ownerName,
-        ownerLastname: ownerLastname
+        OwnerId: OwnerId,
+        OwnerName: OwnerName,
+        OwnerLastname: OwnerLastname
     
     }
         
@@ -99,7 +99,7 @@ public async animalexists (ctx: Context, id: string): Promise<boolean> {
 
 public async updateanimal (ctx: Context, id: string, name: string, type: string, breed: string, 
    birthDate: string, description: string, imgUrl: string, pedigree:string,
-   ownerId: string, ownerLastname: string, ownerName: string ): 
+   OwnerId: string, OwnerLastname: string, OwnerName: string ): 
    Promise<void> {
     
     const exists = await this.animalexists(ctx, id);
@@ -120,9 +120,9 @@ public async updateanimal (ctx: Context, id: string, name: string, type: string,
         description: description,
         imgUrl: imgUrl,
         pedigree: pedigree,
-        ownerId: ownerId,
-        ownerName: ownerName,
-        ownerLastname: ownerLastname,
+        OwnerId: OwnerId,
+        OwnerName: OwnerName,
+        OwnerLastname: OwnerLastname,
    
     };
     
@@ -331,9 +331,9 @@ public async getallanimals (ctx: Context): Promise<string> {
         }
 
         const updatedOwner = {
-            ownerId: newId,
-            ownerName: newOwnerName,
-            ownerLastname: newOwnerLastname,
+            OwnerId: newId,
+            OwnerName: newOwnerName,
+            OwnerLastname: newOwnerLastname,
         };
 
         return ctx.stub.putState (id, Buffer.from(stringify(updatedOwner)));

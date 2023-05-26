@@ -44,12 +44,12 @@ export class Owner extends Animal  {
   public docType?: string;
 
   @Property()
-  public ownerId: string;
+  public OwnerId: string;
 
   @Property()
-  public ownerName: string;
+  public OwnerName: string;
 
   @Property()
-  public ownerLastname: string;
+  public OwnerLastname: string;
 
 }
