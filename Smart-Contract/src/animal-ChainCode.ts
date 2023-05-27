@@ -281,12 +281,12 @@ public async getallanimals (ctx: Context): Promise<string> {
      public async getanimalbyowner(
     
         ctx: Context,
-        ownerId: string
+        OwnerId: string
     ): 
     Promise<string> {
         const allResults = [];
 
-        const iterator = await ctx.stub.getQueryResult(ownerId);
+        const iterator = await ctx.stub.getQueryResult(OwnerId);
         let result = await iterator.next();
     
         while (!result.done) {
